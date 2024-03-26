@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ "Master-Branch" ]
+  pull_request:
+    branches: [ "Master-Branch" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Create Executable
+        run: |
+          pyinstaller --onefile --add-data 'src:resources' main.py
+          mv dist/main dist/${{ github.repository }}
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.repository }}
+          path: dist/${{ github.repository }}
